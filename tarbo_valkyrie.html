@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarbo — Valkyrie Field Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #06080f;
+    --panel:     #0a0d16;
+    --card:      #0f1320;
+    --border:    #1a2035;
+    --border2:   #242d48;
+    --accent:    #4fc3f7;
+    --accent2:   #0288d1;
+    --text:      #cdd8f0;
+    --muted:     #4a5580;
+    --muted2:    #2a3050;
+    --green:     #4caf82;
+    --red:       #e05555;
+    --gold:      #e8b84b;
+    --bang:      #DA292A;
+    --alter:     #4caf82;
+    --font-head: 'Barlow Condensed', sans-serif;
+    --font-ui:   'Barlow', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: clamp(14px, 1.2vw, 18px);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(10,20,50,0.3) 39px, rgba(10,20,50,0.3) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(10,20,50,0.15) 39px, rgba(10,20,50,0.15) 40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 320px;
+    background: radial-gradient(ellipse at 70% 0%, rgba(79,195,247,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 100%;
+    padding: 0 clamp(20px, 4vw, 72px) 80px;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ────────────────────────────────────────────── */
+  .header {
+    padding: clamp(20px, 2.5vw, 36px) 0 clamp(14px, 1.8vw, 24px);
+    border-bottom: 2px solid var(--accent);
+    margin-bottom: clamp(16px, 2vw, 28px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header-left { display: flex; align-items: center; gap: clamp(14px, 2vw, 28px); }
+
+  .header-portrait {
+    width: clamp(80px, 10vw, 160px);
+    height: clamp(80px, 10vw, 160px);
+    object-fit: cover;
+    object-position: top center;
+    border: 2px solid var(--accent);
+    filter: saturate(0.85) contrast(1.1);
+    flex-shrink: 0;
+    box-shadow: 0 0 24px rgba(79,195,247,0.3);
+  }
+
+  .logo {
+    font-family: var(--font-head);
+    font-weight: 900;
+    font-size: clamp(26px, 3.5vw, 54px);
+    font-style: italic;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: #ffffff;
+  }
+  .logo span { color: var(--accent); }
+
+  .header-sub {
+    font-family: var(--font-mono);
+    font-size: clamp(9px, 0.85vw, 12px);
+    color: var(--accent);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-top: 5px;
+    opacity: 0.85;
+  }
+
+  .header-badges {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-family: var(--font-mono);
+    font-size: clamp(8px, 0.7vw, 10px);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+  }
+  .badge.role { border-color: var(--accent); color: var(--accent); }
+  .badge.class { border-color: rgba(79,195,247,0.4); color: var(--accent2); }
+  .badge.team { border-color: var(--gold); color: var(--gold); }
+
+  .config-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    border: 1px solid var(--red);
+    color: var(--red);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    background: none;
+  }
+  .config-badge:hover { background: rgba(224,85,85,0.1); }
+  .config-badge.connected { border-color: var(--green); color: var(--green); }
+
+  .header-vfx {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 220px;
+    background: linear-gradient(to left, rgba(79,195,247,0.05) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* ── TABS ──────────────────────────────────────────────── */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: clamp(16px, 2vw, 28px);
+    border-bottom: 2px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    font-family: var(--font-ui);
+    font-size: clamp(11px, 1vw, 14px);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: clamp(8px, 1vw, 13px) clamp(14px, 1.6vw, 24px);
+    color: var(--muted);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── PANELS ────────────────────────────────────────────── */
+  .panel { display: none; animation: fadeIn 0.2s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (min-width: 1100px) {
+    #panel-abilities.active,
+    #panel-team.active,
+    #panel-growth.active,
+    #panel-mindset.active { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 2vw, 28px); align-items: start; }
+    #panel-log.active { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 2vw, 28px); align-items: start; }
+  }
+
+  /* ── CARDS ─────────────────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--border2);
+    padding: clamp(18px, 2.2vw, 32px);
+    margin-bottom: clamp(14px, 1.5vw, 20px);
+  }
+  .card-accent { border-top-color: var(--accent); }
+  .card-gold   { border-top-color: var(--gold); }
+  .card-green  { border-top-color: var(--green); }
+  .card-red    { border-top-color: var(--red); }
+
+  .card-title {
+    font-family: var(--font-head);
+    font-size: clamp(14px, 1.3vw, 20px);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #ffffff;
+    font-style: italic;
+    margin-bottom: clamp(12px, 1.2vw, 18px);
+  }
+
+  /* ── ABILITY BLOCKS ────────────────────────────────────── */
+  .ability {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    padding: clamp(12px, 1.4vw, 20px);
+    margin-bottom: 10px;
+  }
+  .ability-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .ability-type {
+    font-family: var(--font-mono);
+    font-size: clamp(8px, 0.7vw, 10px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(79,195,247,0.1);
+    padding: 2px 8px;
+    border: 1px solid rgba(79,195,247,0.3);
+  }
+  .ability-name {
+    font-family: var(--font-head);
+    font-size: clamp(15px, 1.4vw, 22px);
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+  .ability-desc {
+    font-size: clamp(12px, 1vw, 15px);
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .ability-tips { margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
+  .ability-tip {
+    font-size: clamp(11px, 0.95vw, 14px);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    line-height: 1.6;
+    padding: 2px 0;
+  }
+  .ability-tip::before { content: '▸ '; opacity: 0.7; }
+
+  /* ── CALLOUTS ──────────────────────────────────────────── */
+  .callout {
+    background: rgba(79,195,247,0.05);
+    border: 1px solid rgba(79,195,247,0.18);
+    border-left: 4px solid var(--accent);
+    padding: clamp(10px, 1.2vw, 16px) clamp(12px, 1.4vw, 20px);
+    margin: 10px 0;
+    font-size: clamp(12px, 1vw, 15px);
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .callout.gold  { background: rgba(232,184,75,0.05); border-color: rgba(232,184,75,0.2); border-left-color: var(--gold); }
+  .callout.green { background: rgba(76,175,130,0.05); border-color: rgba(76,175,130,0.2); border-left-color: var(--green); }
+  .callout.red   { background: rgba(224,85,85,0.05);  border-color: rgba(224,85,85,0.2);  border-left-color: var(--red); }
+  .callout-label {
+    font-family: var(--font-mono);
+    font-size: clamp(9px, 0.75vw, 11px);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .callout.gold  .callout-label { color: var(--gold); }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red   .callout-label { color: var(--red); }
+
+  /* ── GROWTH ITEMS ──────────────────────────────────────── */
+  .growth-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gold);
+    padding: clamp(12px, 1.3vw, 18px);
+    margin-bottom: 10px;
+  }
+  .growth-title {
+    font-family: var(--font-head);
+    font-size: clamp(14px, 1.2vw, 19px);
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 5px;
+  }
+  .growth-body { font-size: clamp(12px, 1vw, 15px); color: var(--text); line-height: 1.6; }
+  .growth-action {
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: clamp(10px, 0.85vw, 13px);
+    color: var(--green);
+    line-height: 1.5;
+  }
+  .growth-action::before { content: '→ '; }
+
+  /* ── COMBO BLOCKS ──────────────────────────────────────── */
+  .combo {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    padding: clamp(14px, 1.6vw, 22px);
+    margin-bottom: 12px;
+  }
+  .combo-name {
+    font-family: var(--font-head);
+    font-size: clamp(16px, 1.5vw, 24px);
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin-bottom: 3px;
+  }
+  .combo-trigger {
+    font-family: var(--font-mono);
+    font-size: clamp(10px, 0.85vw, 13px);
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+  .combo-steps { list-style: none; }
+  .combo-step {
+    display: flex;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: clamp(12px, 1vw, 15px);
+    color: var(--text);
+    line-height: 1.4;
+    align-items: flex-start;
+  }
+  .combo-step:last-child { border-bottom: none; }
+  .combo-who {
+    font-family: var(--font-mono);
+    font-size: clamp(8px, 0.75vw, 10px);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding-top: 3px;
+    min-width: 56px;
+    flex-shrink: 0;
+  }
+  .you  { color: var(--accent); }
+  .bang { color: var(--bang); }
+  .alt  { color: var(--alter); }
+
+  /* ── FORMS ─────────────────────────────────────────────── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(10px, 1.2vw, 16px); }
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 600px) { .form-grid, .form-grid.three { grid-template-columns: 1fr; } }
+
+  .field-group { margin-bottom: 12px; }
+  .field-label {
+    font-size: clamp(9px, 0.8vw, 11px);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+    display: block;
+  }
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: clamp(12px, 1vw, 14px);
+    padding: clamp(7px, 0.8vw, 11px) clamp(10px, 1vw, 14px);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { min-height: clamp(60px, 6vw, 90px); resize: vertical; font-family: var(--font-ui); }
+  select option { background: var(--card); }
+
+  .btn {
+    font-family: var(--font-ui);
+    font-size: clamp(12px, 1vw, 14px);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: clamp(8px, 0.9vw, 12px) clamp(16px, 1.6vw, 24px);
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: var(--bg); }
+  .btn-primary:hover { background: #7dd6fa; }
+  .btn-secondary { background: var(--border2); color: var(--text); }
+  .btn-secondary:hover { background: var(--border); }
+  .flex-end { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+  /* ── LOG ENTRIES ───────────────────────────────────────── */
+  .log-entry {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border2);
+    padding: clamp(12px, 1.2vw, 18px) clamp(14px, 1.4vw, 20px);
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: start;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .log-entry:hover { border-left-color: var(--accent); }
+  .log-entry.win { border-left-color: var(--green); }
+  .log-entry.loss { border-left-color: var(--red); }
+
+  .log-placement {
+    font-family: var(--font-head);
+    font-size: clamp(20px, 2.2vw, 34px);
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+    min-width: 44px;
+    text-align: center;
+  }
+  .log-placement.top3 { color: var(--accent); }
+  .log-meta { font-size: clamp(11px, 0.9vw, 13px); color: var(--muted); margin-top: 2px; }
+  .log-notes { font-size: clamp(12px, 1vw, 14px); color: var(--text); margin-top: 4px; line-height: 1.4; }
+  .log-rp { font-family: var(--font-mono); font-size: clamp(12px, 1.1vw, 16px); font-weight: 700; text-align: right; }
+  .log-rp.pos { color: var(--green); }
+  .log-rp.neg { color: var(--red); }
+
+  /* ── STATS ─────────────────────────────────────────────── */
+  .stats-row { display: flex; gap: clamp(6px, 0.8vw, 12px); margin-bottom: clamp(14px, 1.6vw, 22px); flex-wrap: wrap; }
+  .stat-pill {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: clamp(10px, 1vw, 16px) clamp(14px, 1.4vw, 22px);
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+  }
+  .stat-val { font-family: var(--font-head); font-size: clamp(20px, 2.2vw, 34px); font-weight: 900; color: #ffffff; line-height: 1; }
+  .stat-lbl { font-size: clamp(9px, 0.8vw, 12px); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+  /* ── WEEKLY ─────────────────────────────────────────────── */
+  .week-card { background: var(--panel); border: 1px solid var(--border); padding: clamp(14px, 1.5vw, 22px); margin-bottom: 10px; }
+  .week-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 0; }
+  .week-title { font-family: var(--font-head); font-size: clamp(14px, 1.3vw, 20px); font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #ffffff; font-style: italic; }
+  .week-body { display: none; margin-top: 14px; }
+  .week-body.open { display: block; }
+  .week-chevron { color: var(--muted); transition: transform 0.2s; }
+  .week-chevron.open { transform: rotate(180deg); }
+
+  .detail-field { margin-bottom: 12px; }
+  .detail-label { font-size: clamp(9px, 0.75vw, 11px); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+  .detail-val { font-size: clamp(13px, 1.1vw, 16px); color: var(--text); line-height: 1.5; }
+
+  /* ── MINDSET ───────────────────────────────────────────── */
+  .mindset-block {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    padding: clamp(14px, 1.6vw, 22px);
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mindset-block::before {
+    content: '"';
+    position: absolute;
+    top: -10px; right: 10px;
+    font-size: 80px;
+    font-family: var(--font-head);
+    font-weight: 900;
+    color: var(--accent);
+    opacity: 0.08;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .mindset-text {
+    font-family: var(--font-head);
+    font-size: clamp(16px, 1.6vw, 24px);
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1.4;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+  .mindset-sub { font-size: clamp(12px, 1vw, 15px); color: var(--muted); line-height: 1.5; }
+
+  /* ── MODAL ─────────────────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(6,8,15,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-top: 3px solid var(--accent);
+    max-width: clamp(460px, 44vw, 640px);
+    width: 100%;
+    padding: clamp(20px, 2.5vw, 32px);
+  }
+  .modal-title {
+    font-family: var(--font-head);
+    font-size: clamp(16px, 1.6vw, 22px);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ffffff;
+    font-style: italic;
+    border-left: 4px solid var(--accent);
+    padding-left: 12px;
+    margin-bottom: 10px;
+  }
+  .modal-desc { font-size: clamp(12px, 1vw, 14px); color: var(--muted); line-height: 1.6; margin-bottom: 18px; }
+  .modal-desc strong { color: var(--text); }
+  .steps { margin-bottom: 18px; }
+  .step { display: flex; gap: 12px; margin-bottom: 12px; font-size: clamp(12px, 1vw, 14px); line-height: 1.5; color: var(--text); }
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--accent);
+    color: var(--bg);
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .field-group-modal { margin-bottom: 14px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+
+  /* ── DETAIL MODAL ──────────────────────────────────────── */
+  #detailModal .modal { max-width: clamp(360px, 40vw, 560px); }
+
+  /* ── TOAST ─────────────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-left: 4px solid var(--accent);
+    padding: 10px 20px;
+    font-size: 13px;
+    font-family: var(--font-mono);
+    color: var(--text);
+    z-index: 200;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { border-left-color: var(--red); }
+  .toast.success { border-left-color: var(--green); }
+
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+  .empty-icon { font-size: 28px; margin-bottom: 10px; opacity: 0.4; }
+
+  .section-hdr {
+    font-family: var(--font-head);
+    font-size: clamp(11px, 1vw, 14px);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-hdr::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ── SETUP MODAL ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="setupModal">
+  <div class="modal">
+    <div class="modal-title">⚙ Connect Google Sheets</div>
+    <div class="modal-desc">
+      Your game log and weekly notes are saved to your own Google Sheet. You only need to do this once — paste your Web App URL below.<br><br>
+      <strong>Don't have one? Ask your squad leader — he'll set it up for you.</strong>
+    </div>
+    <div class="field-group-modal">
+      <label class="field-label">Apps Script Web App URL</label>
+      <input type="text" id="cfgScriptUrl" placeholder="https://script.google.com/macros/s/...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeSetup()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Save & Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DETAIL MODAL ────────────────────────────────────────── -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" id="detailContent"></div>
+</div>
+
+<!-- ── TOAST ───────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── APP ─────────────────────────────────────────────────── -->
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <img src="./Valkyrie.jpg" class="header-portrait" alt="Valkyrie">
+      <div>
+        <div class="logo"><span>Tarbo</span> — Valkyrie</div>
+        <div class="header-sub">Field Guide &nbsp;·&nbsp; Season Reference</div>
+        <div class="header-badges">
+          <span class="badge role">Team Fragger</span>
+          <span class="badge class">Recon Class</span>
+          <span class="badge team">The Trio</span>
+        </div>
+      </div>
+    </div>
+    <button class="config-badge" id="configBtn" onclick="openSetup()">⚙ NOT CONNECTED</button>
+    <div class="header-vfx"></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('mindset')">Mindset</button>
+    <button class="tab" onclick="switchTab('growth')">Level Up</button>
+    <button class="tab" onclick="switchTab('team')">Team Combos</button>
+    <button class="tab" onclick="switchTab('abilities')">Abilities</button>
+    <button class="tab" onclick="switchTab('log')">Game Log</button>
+    <button class="tab" onclick="switchTab('weekly')">Weekly Focus</button>
+  </div>
+
+  <!-- ── ABILITIES ──────────────────────────────────────────── -->
+  <div class="panel" id="panel-abilities">
+
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">Valkyrie — Current Kit (Season 28)</div>
+
+        <div class="ability">
+          <div class="ability-header">
+            <span class="ability-type">Passive</span>
+            <span class="ability-name">VTOL Jets + Jet-Fighter HUD</span>
+          </div>
+          <div class="ability-desc">Two passives in one. VTOL Jets let you fly with a jetpack — recharges 3x faster after the Season 27 overhaul, making repeated short bursts and re-engagements much more viable. Jet-Fighter HUD silently scans and marks enemies within 250m during any skydive or Skyward Dive launch. Enemies don't know they've been spotted. Champion and kill leader flagged with CH and KL.</div>
+          <div class="ability-tips">
+            <div class="ability-tip">Short bursts beat long burns — faster recharge means you can re-engage aerially much sooner</div>
+            <div class="ability-tip">Holding fire button (without shooting) while jetting drastically cuts fuel use — safe repositioning trick</div>
+            <div class="ability-tip">Hover over a doorway or ledge = one of the hardest angles in the game to deal with</div>
+            <div class="ability-tip">HUD scan is completely silent — always call out what you see, the squad needs that intel out loud</div>
+            <div class="ability-tip">Jets don't recharge until you land — always have a landing spot in mind before you go up</div>
+          </div>
+        </div>
+
+        <div class="ability">
+          <div class="ability-header">
+            <span class="ability-type">Tactical</span>
+            <span class="ability-name">Missile Swarm</span>
+          </div>
+          <div class="ability-desc">Fires 12 missiles in a 4x3 array. First hit deals ~25 damage, follow-ups ~3 each. Slows and stuns for 2 seconds. Season 27 upgrades: no longer self-damages if you're caught in your own blast, scans enemies on hit, and forces enemy movement passives (Octane stims, Pathfinder grapple, etc.) into cooldown on contact. Explosion radius up 20%, minimum range reduced — more reliable at close range and indoors.</div>
+          <div class="ability-tips">
+            <div class="ability-tip">Missile now scans on hit — push immediately, you have live intel on their position</div>
+            <div class="ability-tip">The stun is the window — push the second it lands, every hesitation wastes it</div>
+            <div class="ability-tip">Missile into Bangalore smoke = they can't see or move — one of the best combos on the squad</div>
+            <div class="ability-tip">Angle the reticle just over cover so missiles arc behind enemy positions</div>
+            <div class="ability-tip">Movement lockout on hit — if they were counting on a dash or grapple to escape, they can't</div>
+          </div>
+        </div>
+
+        <div class="ability">
+          <div class="ability-header">
+            <span class="ability-type">Ultimate</span>
+            <span class="ability-name">Skyward Dive</span>
+          </div>
+          <div class="ability-desc">Two-step launch — prepare then fire. Teammates interact to join. Works like a portable jump tower. Season 27: cooldown reduced from 3 min to 2.5 min, launch height increased 15%. Jet-Fighter HUD scans activate on both the launch and the skydive. You're vulnerable during the setup animation — find hard cover before initiating.</div>
+          <div class="ability-tips">
+            <div class="ability-tip">2.5 min cooldown means it's available more often — use it more aggressively than before</div>
+            <div class="ability-tip">Call "popping ult" before initiating — squad needs a beat to interact before you launch</div>
+            <div class="ability-tip">Short launch for recon only — pop it briefly just to get the scan, then cancel or redirect if no reposition needed</div>
+            <div class="ability-tip">Best use: claim ring position before anyone is forced to move — not as a panic escape</div>
+            <div class="ability-tip">Hard cover before setup — you're stationary during the animation and an easy target</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">Legend Perks — Know Your Options</div>
+        <div class="callout">
+          <div class="callout-label">How Perks Work</div>
+          As your Evo armor levels up mid-game you choose one perk at each tier — two total per match. Pick based on what role you need that game: more aerial aggression or bigger rotation radius.
+        </div>
+
+        <div class="ability" style="border-left-color:var(--gold)">
+          <div class="ability-header">
+            <span class="ability-type" style="color:var(--gold);background:rgba(232,184,75,0.1);border-color:rgba(232,184,75,0.3)">Perk — Tier 1</span>
+            <span class="ability-name">Afterburners</span>
+          </div>
+          <div class="ability-desc">Skyward Dive launch height increases ~15%. More height means wider skydive range and more ring position options for the squad.</div>
+          <div class="ability-tips">
+            <div class="ability-tip">Best when you need to reach high ground or a distant final ring — rotation-first pick</div>
+          </div>
+        </div>
+
+        <div class="ability" style="border-left-color:var(--gold)">
+          <div class="ability-header">
+            <span class="ability-type" style="color:var(--gold);background:rgba(232,184,75,0.1);border-color:rgba(232,184,75,0.3)">Perk — Tier 1 (Alt)</span>
+            <span class="ability-name">Aerial Expert</span>
+          </div>
+          <div class="ability-desc">Significantly improves VTOL jet horizontal speed and handling, decreases initial fuel consumption. Makes the jetpack feel like a proper fighter jet — faster, sharper, more responsive mid-fight.</div>
+          <div class="ability-tips">
+            <div class="ability-tip">Best when you plan to use the jetpack aggressively in fights — faster horizontal movement is much harder to track</div>
+            <div class="ability-tip">Pairs well with hover-peeking and aerial duels — you cover ground faster between bursts</div>
+          </div>
+        </div>
+
+        <div class="ability" style="border-left-color:var(--gold)">
+          <div class="ability-header">
+            <span class="ability-type" style="color:var(--gold);background:rgba(232,184,75,0.1);border-color:rgba(232,184,75,0.3)">Perk — Tier 2</span>
+            <span class="ability-name">Full Coverage</span>
+          </div>
+          <div class="ability-desc">Changes Missile Swarm pattern from 4x3 to 3x5 — wider horizontal spread, better area denial, hits more of a spread-out squad.</div>
+          <div class="ability-tips">
+            <div class="ability-tip">Best in final rings where enemies are spread laterally across cover or over ledges</div>
+            <div class="ability-tip">Great for flushing squads off high ground or doorways</div>
+          </div>
+        </div>
+
+        <div class="ability" style="border-left-color:var(--gold)">
+          <div class="ability-header">
+            <span class="ability-type" style="color:var(--gold);background:rgba(232,184,75,0.1);border-color:rgba(232,184,75,0.3)">Perk — Tier 2 (Alt)</span>
+            <span class="ability-name">Fuel Tank</span>
+          </div>
+          <div class="ability-desc">Adds +25% VTOL jet fuel capacity. More total time in the air per burn cycle.</div>
+          <div class="ability-tips">
+            <div class="ability-tip">Best if you burn through fuel early and want sustained aerial presence late game</div>
+            <div class="ability-tip">Pairs with Aerial Expert for maximum time-in-air build</div>
+          </div>
+        </div>
+
+        <div class="callout gold" style="margin-top:12px">
+          <div class="callout-label">Recommended for Tarbo</div>
+          <strong>Aerial Expert + Full Coverage</strong> — leans into your fragger identity. Faster, harder-to-track jetpack in fights, wider missile coverage in final rings. The <strong>Afterburners + Fuel Tank</strong> combo is the rotation-first build if the squad needs max ult range that game.
+        </div>
+      </div>
+
+      <div class="card card-accent">
+        <div class="card-title">Season 28 Context</div>
+        <div class="callout green">
+          <div class="callout-label">Where Valkyrie Stands</div>
+          Valkyrie received no changes in Season 28 (Breach) — her Season 27 overhaul was substantial enough that she came into this season in a strong spot. The meta shifted toward close-quarters combat with Hardlight Mesh and Fuse's rework, which actually plays to your aggressive style as a fragger — shorter engagements are your territory.
+        </div>
+        <div style="margin-top:12px;font-size:clamp(12px,1vw,15px);color:var(--text);line-height:1.9;padding-left:12px;border-left:2px solid var(--border2);">
+          <div>▸ Jets recharge 3x faster — use them more, lose the hesitation</div>
+          <div>▸ Missile scans on hit — push immediately, the intel is live</div>
+          <div>▸ Missile locks out enemy movement passives — counters mobile legends</div>
+          <div>▸ Ult is 2.5 min now — more available, stay proactive with it</div>
+          <div>▸ All scans are silent — call them out loud every time</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── TEAM COMBOS ─────────────────────────────────────────── -->
+  <div class="panel" id="panel-team">
+
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">Squad Identity</div>
+        <div class="callout">
+          <div class="callout-label">The Trio — Bangalore · Valkyrie · Alter</div>
+          This squad wins through map control and superior positioning — not raw gunfights. Bangalore controls tempo with smokes. You move the squad anywhere on the map. Alter creates entries and extraction. When all three pieces work together, you choose when and where every fight happens.
+        </div>
+      </div>
+
+      <div class="card card-accent">
+        <div class="card-title">Push Combo</div>
+        <div class="combo">
+          <div class="combo-name">Smoke Push</div>
+          <div class="combo-trigger">Call: "Smoke push, go"</div>
+          <ul class="combo-steps">
+            <li class="combo-step"><span class="combo-who bang">Bangalore</span><span>Smokes the approach angle — closes distance before enemies have a clean shot</span></li>
+            <li class="combo-step"><span class="combo-who alt">Alter</span><span>Places Void Passage for a secondary entry angle through or around the smoke</span></li>
+            <li class="combo-step"><span class="combo-who you">You</span><span>Push from above using VTOL jets or through the smoke — two-angle pressure that's extremely hard to hold</span></li>
+          </ul>
+        </div>
+        <div class="callout green">
+          <div class="callout-label">Your Job in This Combo</div>
+          You're the pressure from a direction they're not watching. The smoke cuts their vision, Alter splits their focus — your push from height or a third angle closes the trap. Commit when you hear "go."
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">Reset Combo</div>
+        <div class="combo" style="border-top-color:var(--gold)">
+          <div class="combo-name">Smoke Out</div>
+          <div class="combo-trigger">Call: "Smoking out" — everyone stops shooting immediately</div>
+          <ul class="combo-steps">
+            <li class="combo-step"><span class="combo-who bang">Bangalore</span><span>Smokes the exit path — not your current position. You need to move through the smoke, not hide in it</span></li>
+            <li class="combo-step"><span class="combo-who you">You</span><span>Stop fighting the second you hear the call. Move immediately — hesitation kills this combo</span></li>
+            <li class="combo-step"><span class="combo-who alt">Alter</span><span>Covers the retreat with a Void Passage as a last-resort extraction layer</span></li>
+          </ul>
+        </div>
+        <div class="callout gold">
+          <div class="callout-label">Why This Works</div>
+          Three layers of escape means you can take slightly riskier fights knowing you have a clean out. The moment you hear "smoking out" — stop firing and move. Every second you keep shooting is a second you're not repositioning.
+        </div>
+      </div>
+
+      <div class="card card-accent">
+        <div class="card-title">Late Game Protocol</div>
+        <div class="callout green">
+          <div class="callout-label">Ring 3 and Beyond</div>
+          Your ult is the most valuable thing on the map in late game. The squad that claims the final ring position first usually wins. Before ring 3 closes, call out where you think final ring is going — then use the ult to get there before everyone else is forced to move.
+        </div>
+        <div style="margin-top:12px;font-size:clamp(12px,1vw,15px);color:var(--text);line-height:1.8;padding-left:12px;border-left:2px solid var(--border2);">
+          <div>▸ Skyward Dive to claim high ground before final ring</div>
+          <div>▸ Enemy scan on landing = free intel, always call it out</div>
+          <div>▸ Missile swarm on teams forced to move in ring</div>
+          <div>▸ Stay connected — this is where the squad needs to move as one</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── LEVEL UP ────────────────────────────────────────────── -->
+  <div class="panel" id="panel-growth">
+
+    <div>
+      <div class="card card-gold">
+        <div class="card-title">Areas to Level Up</div>
+
+        <div class="growth-item">
+          <div class="growth-title">Playing as a Unit</div>
+          <div class="growth-body">Your individual gunfight ability is one of the squad's biggest strengths. When that's combined with coordinated pushes, it becomes nearly unstoppable. The unlock is bringing the squad along for the ride instead of going in alone — the difference between a win and a third-party situation.</div>
+          <div class="growth-action">Before engaging, a quick "pushing left building" gives the squad time to support your play</div>
+        </div>
+
+        <div class="growth-item">
+          <div class="growth-title">Macro Awareness in Late Game</div>
+          <div class="growth-body">Your mechanical edge is real — the next multiplier on top of that is ring awareness. Knowing where the next ring is going before you have to move turns a strong gunfighter into a complete player. The squad leans on you for the push — ring reads let you pick the exact right moment to push.</div>
+          <div class="growth-action">Start tracking ring position from ring 2 onward — ask yourself "where is this going?" each circle</div>
+        </div>
+
+        <div class="growth-item">
+          <div class="growth-title">Ult as a Proactive Tool</div>
+          <div class="growth-body">Skyward Dive is most powerful when used before a situation becomes urgent. Teams that use it to escape are reacting — teams that use it to set up are winning. Getting comfortable initiating it when the squad is safe (not when you're being pushed) is the habit that separates good Valkyrie play from great Valkyrie play.</div>
+          <div class="growth-action">Practice calling "popping ult" when things are calm — build the habit before pressure situations</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card card-gold">
+        <div class="card-title">Focus Drills</div>
+        <div class="callout gold">
+          <div class="callout-label">Drill 1 — Communication Before Pushing</div>
+          Once per session, before you push, say one sentence out loud about what you're doing. "Pushing the team on the right." Doesn't have to be long. Build the habit and the squad will naturally fall in behind you.
+        </div>
+        <div class="callout gold">
+          <div class="callout-label">Drill 2 — Ring Check</div>
+          Every time the ring updates, pause for two seconds and answer: where is this ring going? Do this every game, every ring. After a few sessions it becomes automatic.
+        </div>
+        <div class="callout gold">
+          <div class="callout-label">Drill 3 — Ult Timing</div>
+          Once per session, use Skyward Dive when the squad is NOT in a fight — purely for repositioning. Get comfortable with it as a movement tool, not a panic button.
+        </div>
+        <div class="callout green" style="margin-top:16px">
+          <div class="callout-label">The Big Picture</div>
+          You already have the mechanics. These drills aren't about fixing weaknesses — they're about stacking your existing strengths with a layer of coordination that takes the whole squad to the next level.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── MINDSET ─────────────────────────────────────────────── -->
+  <div class="panel active" id="panel-mindset">
+
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">Mindset Principles</div>
+
+        <div class="mindset-block">
+          <div class="mindset-text">Your gunfight ability is a weapon. The squad is the trigger.</div>
+          <div class="mindset-sub">You're dangerous solo. You're unstoppable when the squad moves with you. Every coordinated push where you lead the charge and the squad follows is the game at its best.</div>
+        </div>
+
+        <div class="mindset-block" style="border-left-color:var(--gold)">
+          <div class="mindset-text">Recon is information. Use it out loud.</div>
+          <div class="mindset-sub">The enemy scan from your ult, the positions you see from hovering — this intel is gold. Calling it out in real time is one of the highest-value things you can do for the squad even when you're not firing a shot.</div>
+        </div>
+
+        <div class="mindset-block" style="border-left-color:var(--green)">
+          <div class="mindset-text">Positioning wins games that aim can't.</div>
+          <div class="mindset-sub">Valkyrie lets you pick fights that other legends can only dream of taking. Getting to the right position before the fight starts means you're already winning before anyone pulls a trigger.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">Between Games</div>
+        <div class="callout">
+          <div class="callout-label">60-Second Reset</div>
+          Before you requeue, answer one question: did the squad move together or did we fragment? If together — what made that work? If fragmented — what one thing would have kept us connected? One sentence, then requeue.
+        </div>
+        <div class="callout gold" style="margin-top:10px">
+          <div class="callout-label">After a Good Game</div>
+          Identify the exact moment the squad clicked. Was it a combo that worked? A rotation that got you the ring position? Call it out to the squad — positive reinforcement builds repeatable habits faster than any drill.
+        </div>
+        <div class="callout green" style="margin-top:10px">
+          <div class="callout-label">The Standard</div>
+          The goal every session isn't wins — it's: did I use the ult with intention, did I communicate before pushing, and did I track the ring? Hit those three and the wins follow.
+        </div>
+      </div>
+
+      <div class="card" style="border-top-color:var(--accent)">
+        <div class="card-title">Your Notes</div>
+        <textarea id="mindsetNotes" placeholder="Jot anything down — thoughts between games, things that clicked, things to try next session..." style="width:100%;min-height:clamp(120px,14vw,200px);"></textarea>
+        <div class="flex-end" style="margin-top:8px">
+          <button class="btn btn-primary" onclick="saveMindsetNotes()">Save Notes</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── GAME LOG ────────────────────────────────────────────── -->
+  <div class="panel" id="panel-log">
+
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">Log a Game</div>
+        <div class="form-grid three">
+          <div class="field-group">
+            <label class="field-label">Date</label>
+            <input type="text" id="logDate" placeholder="e.g. Feb 28">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Mode</label>
+            <select id="logMode">
+              <option value="Ranked">Ranked</option>
+              <option value="With The Trio">With The Trio</option>
+              <option value="Duo">Duo</option>
+              <option value="Solo Queue">Solo Queue</option>
+              <option value="Mixtape">Mixtape</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Placement</label>
+            <input type="number" id="logPlacement" placeholder="e.g. 3" min="1" max="20">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field-group">
+            <label class="field-label">RP +/-</label>
+            <input type="number" id="logRP" placeholder="e.g. +180 or -48">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Kills / Assists</label>
+            <input type="text" id="logKD" placeholder="e.g. 5K / 2A">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">✓ Something that worked</label>
+          <textarea id="logRight" placeholder="One thing that clicked this game."></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">→ One thing to try next time</label>
+          <textarea id="logDiff" placeholder="Keep it to one thing."></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">★ Anything notable</label>
+          <textarea id="logNote" placeholder="Highlight, moment to remember, clip to review..." style="min-height:52px"></textarea>
+        </div>
+        <div class="flex-end">
+          <button class="btn btn-secondary" onclick="clearForm()">Clear</button>
+          <button class="btn btn-primary" onclick="saveGame()">Save Game</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="stats-row" id="statsRow">
+        <div class="stat-pill"><div class="stat-val" id="statGames">—</div><div class="stat-lbl">Games</div></div>
+        <div class="stat-pill"><div class="stat-val" id="statNetRP">—</div><div class="stat-lbl">Net RP</div></div>
+        <div class="stat-pill"><div class="stat-val" id="statAvgPlace">—</div><div class="stat-lbl">Avg Place</div></div>
+        <div class="stat-pill"><div class="stat-val" id="statTop5">—</div><div class="stat-lbl">Top 5%</div></div>
+      </div>
+      <div id="historyList"><div class="empty-state"><div class="empty-icon">📋</div>No games logged yet. Log your first game to start tracking.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ── WEEKLY FOCUS ────────────────────────────────────────── -->
+  <div class="panel" id="panel-weekly">
+
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">New Weekly Focus</div>
+        <div class="form-grid">
+          <div class="field-group">
+            <label class="field-label">Week</label>
+            <input type="text" id="wrWeek" placeholder="e.g. Mar 1–7">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Net RP this week</label>
+            <input type="number" id="wrRP" placeholder="e.g. +450">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">What clicked this week</label>
+          <textarea id="wrWin" placeholder="What habit or moment felt like a breakthrough?"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Focus for next week</label>
+          <textarea id="wrFocus" placeholder="One specific thing to work on. Keep it simple."></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Squad notes</label>
+          <textarea id="wrSquad" placeholder="How did the trio play? Anything to bring up next session?" style="min-height:52px"></textarea>
+        </div>
+        <div class="flex-end">
+          <button class="btn btn-primary" onclick="saveWeekly()">Save Focus</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-hdr">Past Weekly Focuses</div>
+      <div id="weeklyList"><div class="empty-state"><div class="empty-icon">📝</div>No weekly focuses logged yet.</div></div>
+    </div>
+
+  </div>
+
+</div><!-- end .app -->
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+let CFG = { scriptUrl: '' };
+let gamesCache = [];
+
+function loadConfig() {
+  const saved = localStorage.getItem('tarboTrackerConfig');
+  if (saved) {
+    CFG = JSON.parse(saved);
+    updateConfigBadge();
+    if (CFG.scriptUrl) loadAll();
+  } else {
+    setTimeout(() => openSetup(), 600);
+  }
+  // Load mindset notes from localStorage
+  const notes = localStorage.getItem('tarboMindsetNotes');
+  if (notes) document.getElementById('mindsetNotes').value = notes;
+}
+
+function saveConfig() {
+  const url = document.getElementById('cfgScriptUrl').value.trim();
+  if (!url || !url.startsWith('https://script.google.com')) {
+    toast('Please paste a valid Apps Script URL.', 'error'); return;
+  }
+  CFG = { scriptUrl: url };
+  localStorage.setItem('tarboTrackerConfig', JSON.stringify(CFG));
+  closeSetup();
+  updateConfigBadge();
+  loadAll().then(() => toast('Connected!', 'success'));
+}
+
+function updateConfigBadge() {
+  const btn = document.getElementById('configBtn');
+  if (CFG.scriptUrl) { btn.textContent = '⚙ CONNECTED'; btn.classList.add('connected'); }
+  else { btn.textContent = '⚙ NOT CONNECTED'; btn.classList.remove('connected'); }
+}
+
+function openSetup() {
+  document.getElementById('cfgScriptUrl').value = CFG.scriptUrl || '';
+  document.getElementById('setupModal').classList.add('open');
+}
+function closeSetup() { document.getElementById('setupModal').classList.remove('open'); }
+
+function saveMindsetNotes() {
+  const val = document.getElementById('mindsetNotes').value;
+  localStorage.setItem('tarboMindsetNotes', val);
+  toast('Notes saved!', 'success');
+}
+
+// ── APPS SCRIPT ───────────────────────────────────────────────────────────────
+async function scriptGet(sheet) {
+  const r = await fetch(`${CFG.scriptUrl}?sheet=${encodeURIComponent(sheet)}`);
+  if (!r.ok) throw new Error(`Fetch failed: ${r.status}`);
+  const d = await r.json();
+  return d.rows || [];
+}
+
+async function scriptPost(sheet, headers, row) {
+  const r = await fetch(CFG.scriptUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ sheet, headers, action: 'append', row })
+  });
+  if (!r.ok) throw new Error(`Post failed: ${r.status}`);
+  const d = await r.json();
+  if (!d.success) throw new Error(d.error || 'Unknown error');
+  return d;
+}
+
+// ── GAME LOG ──────────────────────────────────────────────────────────────────
+function clearForm() {
+  ['logPlacement','logRP','logKD','logRight','logDiff','logNote'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('logMode').value = 'Ranked';
+  document.getElementById('logDate').value = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'});
+}
+
+async function saveGame() {
+  if (!CFG.scriptUrl) { openSetup(); return; }
+  const row = [
+    document.getElementById('logDate').value || new Date().toLocaleDateString(),
+    document.getElementById('logMode').value,
+    document.getElementById('logPlacement').value,
+    document.getElementById('logRP').value,
+    document.getElementById('logKD').value,
+    document.getElementById('logRight').value,
+    document.getElementById('logDiff').value,
+    document.getElementById('logNote').value,
+  ];
+  if (!row[2]) { toast('Placement is required.', 'error'); return; }
+  try {
+    toast('<span class="spinner"></span>Saving…');
+    await scriptPost('Games', ['Date','Mode','Placement','RP','Kills','Worked','Try Next','Notable'], row);
+    clearForm();
+    await loadGames();
+    toast('Game saved!', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function loadGames() {
+  if (!CFG.scriptUrl) return;
+  try {
+    const rows = await scriptGet('Games');
+    gamesCache = rows.filter(r => r[2]);
+    renderHistory();
+    renderStats();
+  } catch(e) { console.warn('loadGames:', e.message); }
+}
+
+function renderStats() {
+  const g = gamesCache;
+  document.getElementById('statGames').textContent = g.length || '—';
+  if (!g.length) return;
+  const net = g.reduce((s,r) => s + (parseInt(r[3])||0), 0);
+  document.getElementById('statNetRP').textContent = (net>=0?'+':'')+net;
+  document.getElementById('statNetRP').className = 'stat-val ' + (net>=0?'text-green':'text-red');
+  document.getElementById('statAvgPlace').textContent = (g.reduce((s,r) => s+(parseInt(r[2])||20),0)/g.length).toFixed(1);
+  const top5 = g.filter(r => parseInt(r[2])<=5).length;
+  document.getElementById('statTop5').textContent = Math.round(top5/g.length*100)+'%';
+}
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (!gamesCache.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>No games yet — log your first one!</div>'; return; }
+  el.innerHTML = [...gamesCache].reverse().map((r,i) => {
+    const place = parseInt(r[2])||20;
+    const rp = parseInt(r[3])||0;
+    const idx = gamesCache.length-1-i;
+    return `<div class="log-entry ${place===1?'win':rp<0?'loss':''}" onclick="showDetail(${idx})">
+      <div>
+        <div class="log-placement ${place<=3?'top3':''}">#${place}</div>
+        <div class="log-meta">${r[0]||''} · ${r[1]||''}</div>
+      </div>
+      <div>
+        <div class="log-meta">${r[4]||''}</div>
+        ${r[5]?`<div class="log-notes"><span style="color:var(--green)">✓</span> ${r[5]}</div>`:''}
+      </div>
+      <div class="log-rp ${rp>=0?'pos':'neg'}">${rp>=0?'+':''}${rp||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function showDetail(idx) {
+  const r = gamesCache[idx];
+  if (!r) return;
+  const rp = parseInt(r[3])||0;
+  document.getElementById('detailContent').innerHTML = `
+    <div class="modal-title">#${r[2]} Place — ${r[0]||'Unknown'}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="detail-field"><div class="detail-label">Mode</div><div class="detail-val">${r[1]||'—'}</div></div>
+      <div class="detail-field"><div class="detail-label">RP</div><div class="detail-val" style="color:${rp>=0?'var(--green)':'var(--red)'}">${rp>=0?'+':''}${rp}</div></div>
+      <div class="detail-field"><div class="detail-label">Kills/Assists</div><div class="detail-val">${r[4]||'—'}</div></div>
+    </div>
+    ${r[5]?`<div class="detail-field"><div class="detail-label">✓ What worked</div><div class="detail-val">${r[5]}</div></div>`:''}
+    ${r[6]?`<div class="detail-field"><div class="detail-label">→ Try next time</div><div class="detail-val">${r[6]}</div></div>`:''}
+    ${r[7]?`<div class="detail-field"><div class="detail-label">★ Notable</div><div class="detail-val">${r[7]}</div></div>`:''}
+    <div style="display:flex;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-secondary" onclick="document.getElementById('detailModal').classList.remove('open')">Close</button>
+    </div>`;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+// ── WEEKLY ────────────────────────────────────────────────────────────────────
+async function saveWeekly() {
+  if (!CFG.scriptUrl) { openSetup(); return; }
+  const row = [
+    document.getElementById('wrWeek').value,
+    document.getElementById('wrRP').value,
+    document.getElementById('wrWin').value,
+    document.getElementById('wrFocus').value,
+    document.getElementById('wrSquad').value,
+  ];
+  if (!row[0]) { toast('Week label required.', 'error'); return; }
+  try {
+    toast('<span class="spinner"></span>Saving…');
+    await scriptPost('Weekly', ['Week','Net RP','What Clicked','Focus Next','Squad Notes'], row);
+    ['wrWeek','wrRP','wrWin','wrFocus','wrSquad'].forEach(id => document.getElementById(id).value = '');
+    await loadWeekly();
+    toast('Focus saved!', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function loadWeekly() {
+  if (!CFG.scriptUrl) return;
+  try {
+    const rows = await scriptGet('Weekly');
+    const el = document.getElementById('weeklyList');
+    if (!rows.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div>No weekly focuses yet.</div>'; return; }
+    el.innerHTML = [...rows].reverse().map((r,i) => {
+      const id = `wk-${i}`;
+      const rp = parseInt(r[1])||0;
+      return `<div class="week-card">
+        <div class="week-header" onclick="toggleWeek('${id}')">
+          <div>
+            <div class="week-title">${r[0]||'Week'}</div>
+            <div class="log-meta" style="margin-top:3px">${r[1]?`<span style="color:${rp>=0?'var(--green)':'var(--red)'}">${rp>=0?'+':''}${rp} RP</span>`:''}</div>
+          </div>
+          <span class="week-chevron" id="chev-${id}">▼</span>
+        </div>
+        <div class="week-body" id="${id}">
+          ${r[2]?`<div class="detail-field" style="margin-top:12px"><div class="detail-label">What clicked</div><div class="detail-val">${r[2]}</div></div>`:''}
+          ${r[3]?`<div class="detail-field"><div class="detail-label">Focus next week</div><div class="detail-val" style="color:var(--accent)">${r[3]}</div></div>`:''}
+          ${r[4]?`<div class="detail-field"><div class="detail-label">Squad notes</div><div class="detail-val">${r[4]}</div></div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { console.warn('loadWeekly:', e.message); }
+}
+
+function toggleWeek(id) {
+  document.getElementById(id).classList.toggle('open');
+  document.getElementById(`chev-${id}`).classList.toggle('open');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  const tabs = ['mindset','growth','team','abilities','log','weekly'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', tabs[i]===name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${name}`).classList.add('active');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.innerHTML = msg;
+  el.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function loadAll() { await Promise.all([loadGames(), loadWeekly()]); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('logDate').value = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  loadConfig();
+  document.getElementById('setupModal').addEventListener('click', e => { if(e.target.id==='setupModal') closeSetup(); });
+  document.getElementById('detailModal').addEventListener('click', e => { if(e.target.id==='detailModal') document.getElementById('detailModal').classList.remove('open'); });
+});
+</script>
+</body>
+</html>
