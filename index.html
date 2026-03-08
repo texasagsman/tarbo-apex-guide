@@ -68,8 +68,9 @@
   }
   .header-left { display: flex; align-items: center; gap: clamp(14px,2vw,28px); }
   .header-portrait {
-    width: clamp(80px,10vw,160px); height: clamp(80px,10vw,160px);
-    object-fit: cover; object-position: top center;
+    width: clamp(80px,10vw,160px);
+    height: auto;
+    object-fit: contain;
     border: 2px solid var(--accent);
     filter: saturate(0.7) contrast(1.15) brightness(0.88);
     flex-shrink: 0;
